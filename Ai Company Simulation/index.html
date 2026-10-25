@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI Company – Sign in</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"></head><body>
+<div class="lg"><section class="lg-l"><div class="brand"><span class="mark">◈</span>AI Company</div>
+<div class="col" style="gap:28px;max-width:520px"><div><h1 style="font-size:42px;line-height:1.1;color:#fff">Your AI team, working in the open.</h1><p style="margin:16px 0 0;font-size:17px;line-height:1.55">Give a goal, pick a team, and watch the Planner, Executor and Critic hand work back and forth in real time.</p></div>
+<div class="col" style="gap:10px"><div class="pv"><span class="av c0">P</span><div><b>Planner</b><p>Splitting the goal into three sub-tasks: research, build, test.</p></div></div><div class="pv"><span class="av c5">E</span><div><b>Executor</b><p>Drafted the landing page and a stub for the login endpoint.</p></div></div><div class="pv"><span class="av c4">C</span><div><b>Critic</b><p>No error handling on /login. Sending it back to the Executor.</p></div></div></div></div>
+<p style="margin:0;font-size:13px;color:#9FB0D6">Runs on free-tier model APIs, with a local model as backup.</p></section>
+<section class="lg-r"><div class="form"><div class="seg"><button id="tIn" class="on">Sign in</button><button id="tUp">Create account</button></div>
+<h2 id="ttl" style="margin:24px 0 4px;font-size:24px">Welcome back</h2><p id="sb" class="muted" style="margin:0">Sign in to continue to your workspace.</p>
+<div id="nmw" hidden><label style="margin-top:16px">Name</label><input id="nm" placeholder="Your name"></div>
+<label style="margin-top:16px">Email</label><input id="em" type="email" placeholder="you@college.edu"><label style="margin-top:16px">Password</label><input id="pw" type="password" placeholder="At least 8 characters">
+<div id="err" class="err"></div><button id="go" class="btn btn-p" style="width:100%;height:46px;font-size:15px">Sign in</button>
+<div class="muted" style="text-align:center;margin:16px 0">or</div><button id="demo" class="btn" style="width:100%;height:46px">Continue as demo user</button></div></section></div>
+<script src="js/store.js"></script><script>
+if(DB.get('me'))location.replace('app.html');let up=false;
+const mode=u=>{up=u;$('#tIn').classList.toggle('on',!u);$('#tUp').classList.toggle('on',u);$('#nmw').hidden=!u;$('#ttl').textContent=u?'Create your account':'Welcome back';$('#go').textContent=u?'Create account':'Sign in';$('#err').textContent=''};
+$('#tIn').onclick=()=>mode(false);$('#tUp').onclick=()=>mode(true);
+const enter=u=>{DB.set('me',u);location.href='app.html'};
+$('#go').onclick=()=>{const em=$('#em').value.trim().toLowerCase(),pw=$('#pw').value,users=DB.get('users',{}),e=$('#err');
+if(!/^\S+@\S+\.\S+$/.test(em))return e.textContent='Enter a valid email address.';if(pw.length<8)return e.textContent='Password must be at least 8 characters.';
+if(up){if(users[em])return e.textContent='An account with this email already exists.';const n=$('#nm').value.trim()||em.split('@')[0];users[em]={name:n,pw};DB.set('users',users);enter({name:n,email:em})}
+else{const u=users[em];if(!u||u.pw!==pw)return e.textContent='Wrong email or password.';enter({name:u.name,email:em})}};
+$('#demo').onclick=()=>enter({name:'Demo User',email:'demo@college.edu'});
+</script></body></html>
