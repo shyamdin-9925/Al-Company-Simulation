@@ -1,106 +1,726 @@
-const me=DB.get('me');if(!me)location.replace('index.html');
-const NAV=[['home','Home','⌂'],['workspace','Active workspace','◉'],['templates','My templates','◇'],['history','History','◷'],['documents','Documents','▤'],['settings','Settings','⚙']];
-const chip=s=>({running:'<span class="ch ch-run">Running</span>',done:'<span class="ch ch-ok">Done</span>',paused:'<span class="ch ch-rev">Paused</span>'}[s]||'');
-const ini=n=>n.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
-function side(r){const act=sessions().some(s=>s.status==='running');$('#side').innerHTML=`<div class="brand"><span class="mark">◈</span>AI Company</div><a class="newb" href="#/home">+ New session</a><div class="gl">WORKSPACE</div>`+NAV.map(([k,l,i])=>`<a class="nv ${r===k?'on':''}" href="#/${k}"><span style="width:18px;text-align:center">${i}</span>${l}${k==='workspace'&&act?'<span class="live"></span>':''}</a>`).join('')+`<div style="flex:1"></div><div class="mst"><span class="live" style="display:inline-block;margin-right:8px"></span>Groq API online<br>Gemini as secondary<br>Local model on standby</div><div class="usr"><span class="av c0">${ini(me.name)}</span>${esc(me.name)}</div>`}
-const V={};
+const me = DB.get("me");
+if (!me) location.replace("index.html");
+const NAV = [
+  ["home", "Home", "⌂"],
+  ["workspace", "Active workspace", "◉"],
+  ["templates", "My templates", "◇"],
+  ["history", "History", "◷"],
+  ["documents", "Documents", "▤"],
+  ["settings", "Settings", "⚙"],
+];
+const chip = (s) =>
+  ({
+    running: '<span class="ch ch-run">Running</span>',
+    done: '<span class="ch ch-ok">Done</span>',
+    paused: '<span class="ch ch-rev">Paused</span>',
+  })[s] || "";
+const ini = (n) =>
+  n
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+function side(r) {
+  const act = sessions().some((s) => s.status === "running");
+  $("#side").innerHTML =
+    `<div class="brand"><span class="mark">◈</span>AI Company</div><a class="newb" href="#/home">+ New session</a><div class="gl">WORKSPACE</div>` +
+    NAV.map(
+      ([k, l, i]) =>
+        `<a class="nv ${r === k ? "on" : ""}" href="#/${k}"><span style="width:18px;text-align:center">${i}</span>${l}${k === "workspace" && act ? '<span class="live"></span>' : ""}</a>`,
+    ).join("") +
+    `<div style="flex:1"></div><div class="mst"><span class="live" style="display:inline-block;margin-right:8px"></span>Groq API online<br>Gemini as secondary<br>Local model on standby</div><div class="usr"><span class="av c0">${ini(me.name)}</span>${esc(me.name)}</div>`;
+}
+const V = {};
 // ---------- HOME ----------
-let hs={tpl:'auto',cat:'All'};
-V.home=()=>{const st=settings(),docs=DB.get('docs',[]),T=allTemplates(),cats=['All','Coding','Research','Content','Business'],h=new Date().getHours();
-const cards=T.filter(t=>hs.cat==='All'||t.cat===hs.cat).map(t=>`<div class="tc ${hs.tpl===t.id?'sel':''}" data-t="${t.id}"><div class="stack">${t.agents.slice(0,5).map((a,i)=>`<span class="av ${colorOf(i)}">${a.role[0]}</span>`).join('')}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p><div class="row" style="justify-content:space-between;font-size:13px;color:#586174"><span>${t.agents.length} agents</span><b style="color:#3730A3">${hs.tpl===t.id?'Selected':'Use template'}</b></div></div>`).join('');
-const rec=sessions().slice(0,3).map(s=>`<div class="li"><div style="flex:1 1 260px"><div class="t1">${esc(s.goal)}</div><div class="t2">${esc(s.tplName)}, ${ago(s.created)}</div></div>${chip(s.paused?'paused':s.status)}<a href="#/workspace/${s.id}" style="font-weight:600">Open</a></div>`).join('')||'<div class="li muted">No sessions yet. Start one above.</div>';
-return `<p class="muted" style="margin:0 0 6px">Good ${h<12?'morning':h<18?'afternoon':'evening'}, ${esc(me.name)}</p><h1 style="margin-bottom:24px">What should your AI team work on?</h1>
+let hs = { tpl: "auto", cat: "All" };
+V.home = () => {
+  const st = settings(),
+    docs = DB.get("docs", []),
+    T = allTemplates(),
+    cats = ["All", "Coding", "Research", "Content", "Business"],
+    h = new Date().getHours();
+  const cards = T.filter((t) => hs.cat === "All" || t.cat === hs.cat)
+    .map(
+      (t) =>
+        `<div class="tc ${hs.tpl === t.id ? "sel" : ""}" data-t="${t.id}"><div class="stack">${t.agents
+          .slice(0, 5)
+          .map((a, i) => `<span class="av ${colorOf(i)}">${a.role[0]}</span>`)
+          .join(
+            "",
+          )}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p><div class="row" style="justify-content:space-between;font-size:13px;color:#586174"><span>${t.agents.length} agents</span><b style="color:#3730A3">${hs.tpl === t.id ? "Selected" : "Use template"}</b></div></div>`,
+    )
+    .join("");
+  const rec =
+    sessions()
+      .slice(0, 3)
+      .map(
+        (s) =>
+          `<div class="li"><div style="flex:1 1 260px"><div class="t1">${esc(s.goal)}</div><div class="t2">${esc(s.tplName)}, ${ago(s.created)}</div></div>${chip(s.paused ? "paused" : s.status)}<a href="#/workspace/${s.id}" style="font-weight:600">Open</a></div>`,
+      )
+      .join("") ||
+    '<div class="li muted">No sessions yet. Start one above.</div>';
+  return `<p class="muted" style="margin:0 0 6px">Good ${h < 12 ? "morning" : h < 18 ? "afternoon" : "evening"}, ${esc(me.name)}</p><h1 style="margin-bottom:24px">What should your AI team work on?</h1>
 <section class="comp"><textarea id="goal" placeholder="Describe your goal, for example: Build a to-do web app with login and a REST API, then test it."></textarea>
-<div class="row" style="margin-top:12px"><span class="chip">Team: <b id="tl">${hs.tpl==='auto'?'Auto-select':esc(getTpl(hs.tpl)?.name)}</b></span><span class="chip">Model: <select id="mdl"><option>Groq, Llama 3.3 70B</option><option>Gemini 2.0 Flash</option><option>Local, Qwen 2.5 3B</option></select></span>
-<span class="chip">Attach docs: <select id="dsel" multiple size="1" style="display:none"></select><b id="dc">${docs.filter(d=>d.on).length}</b> <a href="#/documents">manage</a></span><span class="sp"></span><button class="btn btn-p" id="start" style="height:42px;padding:0 20px">Start session ➤</button></div></section>
+<div class="row" style="margin-top:12px"><span class="chip">Team: <b id="tl">${hs.tpl === "auto" ? "Auto-select" : esc(getTpl(hs.tpl)?.name)}</b></span><span class="chip">Model: <select id="mdl"><option>Groq, Llama 3.3 70B</option><option>Gemini 2.0 Flash</option><option>Local, Qwen 2.5 3B</option></select></span>
+<span class="chip">Attach docs: <select id="dsel" multiple size="1" style="display:none"></select><b id="dc">${docs.filter((d) => d.on).length}</b> <a href="#/documents">manage</a></span><span class="sp"></span><button class="btn btn-p" id="start" style="height:42px;padding:0 20px">Start session ➤</button></div></section>
 <p class="muted" style="font-size:13px;margin:10px 4px 0">With Auto-select on, a router agent reads your goal and picks the best team template for you.</p>
-<div class="sec"><h2>Choose a team template</h2><div class="row" style="gap:8px">${cats.map(c=>`<button class="tab ${hs.cat===c?'on':''}" data-c="${c}">${c}</button>`).join('')}<a href="#/templates" style="font-weight:600;font-size:13.5px;margin-left:8px">Create custom template</a></div></div>
-<div class="grid"><div class="tc ${hs.tpl==='auto'?'sel':''}" data-t="auto"><div class="stack"><span class="av" style="background:#fff;border:2px dashed #A5B4FC;color:#4F46E5;margin-left:0">?</span></div><h3>Auto-select</h3><p>A router agent reads your goal and assembles the best team from the template library.</p><b style="font-size:13px;color:#3730A3">${hs.tpl==='auto'?'Selected':'Use auto-select'}</b></div>${cards}
-<div class="tc dis"><div class="row"><div class="stack">${'SWDG'.split('').map(x=>`<span class="av" style="background:#E2E8F0;color:#334155">${x}</span>`).join('')}</div><span class="ch ch-wait">Future work</span></div><h3>Video Production</h3><p>Scene Planner, Scriptwriter, Settings Designer and a Generator agent.</p></div></div>
-<div class="sec"><h2>Recent sessions</h2><a href="#/history" style="font-weight:600;font-size:13.5px">View all history</a></div><section class="list">${rec}</section>`};
-V.home.bind=()=>{$$('[data-t]').forEach(e=>e.onclick=()=>{const g=$('#goal').value;hs.tpl=e.dataset.t;render();$('#goal').value=g});$$('[data-c]').forEach(e=>e.onclick=()=>{const g=$('#goal').value;hs.cat=e.dataset.c;render();$('#goal').value=g});
-$('#start').onclick=()=>{const g=$('#goal').value.trim();if(g.length<5)return toast('Describe your goal first.');const s=createSession(g,hs.tpl,DB.get('docs',[]).filter(d=>d.on).map(d=>d.name));s.model=$('#mdl').value.split(',')[0];patchSession(s.id,x=>x.model=s.model);toast(`Team: ${s.tplName}`);location.hash='#/workspace/'+s.id}};
+<div class="sec"><h2>Choose a team template</h2><div class="row" style="gap:8px">${cats.map((c) => `<button class="tab ${hs.cat === c ? "on" : ""}" data-c="${c}">${c}</button>`).join("")}<a href="#/templates" style="font-weight:600;font-size:13.5px;margin-left:8px">Create custom template</a></div></div>
+<div class="grid"><div class="tc ${hs.tpl === "auto" ? "sel" : ""}" data-t="auto"><div class="stack"><span class="av" style="background:#fff;border:2px dashed #A5B4FC;color:#4F46E5;margin-left:0">?</span></div><h3>Auto-select</h3><p>A router agent reads your goal and assembles the best team from the template library.</p><b style="font-size:13px;color:#3730A3">${hs.tpl === "auto" ? "Selected" : "Use auto-select"}</b></div>${cards}
+<div class="tc dis"><div class="row"><div class="stack">${"SWDG"
+    .split("")
+    .map(
+      (x) =>
+        `<span class="av" style="background:#E2E8F0;color:#334155">${x}</span>`,
+    )
+    .join(
+      "",
+    )}</div><span class="ch ch-wait">Future work</span></div><h3>Video Production</h3><p>Scene Planner, Scriptwriter, Settings Designer and a Generator agent.</p></div></div>
+<div class="sec"><h2>Recent sessions</h2><a href="#/history" style="font-weight:600;font-size:13.5px">View all history</a></div><section class="list">${rec}</section>`;
+};
+V.home.bind = () => {
+  $$("[data-t]").forEach(
+    (e) =>
+      (e.onclick = () => {
+        const g = $("#goal").value;
+        hs.tpl = e.dataset.t;
+        render();
+        $("#goal").value = g;
+      }),
+  );
+  $$("[data-c]").forEach(
+    (e) =>
+      (e.onclick = () => {
+        const g = $("#goal").value;
+        hs.cat = e.dataset.c;
+        render();
+        $("#goal").value = g;
+      }),
+  );
+  $("#start").onclick = () => {
+    const g = $("#goal").value.trim();
+    if (g.length < 5) return toast("Describe your goal first.");
+    const s = createSession(
+      g,
+      hs.tpl,
+      DB.get("docs", [])
+        .filter((d) => d.on)
+        .map((d) => d.name),
+    );
+    s.model = $("#mdl").value.split(",")[0];
+    patchSession(s.id, (x) => (x.model = s.model));
+    toast(`Team: ${s.tplName}`);
+    location.hash = "#/workspace/" + s.id;
+  };
+};
 // ---------- WORKSPACE ----------
-let wtab='Agents';
-V.workspace=id=>{const s=id?getSession(id):(sessions().find(x=>x.status==='running')||sessions()[0]);if(!s)return `<h1>Active workspace</h1><p class="muted">No session yet.</p><a class="btn btn-p" href="#/home">Start a session</a>`;V._s=s.id;
-const cur=s.script[s.cursor]?.a,idx=a=>s.msgs.filter(m=>m.a===a.id).length,last=a=>[...s.msgs].reverse().find(m=>m.a===a.id);
-const pct=Math.round(s.cursor/s.script.length*100);
-const state=a=>s.status==='done'?['ch-ok','Done']:s.paused?['ch-wait','Paused']:cur===a.id?['ch-run','Working']:idx(a)?['ch-ok','Done']:['ch-wait','Waiting'];
-const agCards=s.agents.map((a,i)=>{const[c,l]=state(a),m=last(a);return (i?'<div class="vl"></div>':'')+`<div class="ag ${cur===a.id&&!s.paused&&s.status==='running'?'act':''}" style="max-width:460px;margin:0 auto;width:100%"><div class="ag-h"><span class="av ${colorOf(i)}">${a.role[0]}</span><div style="flex:1"><b>${esc(a.role)}</b><div class="muted" style="font-size:12.5px">${esc(a.desc)}</div></div><span class="ch ${c}">${l}</span></div><div class="ag-t">${m?esc(m.t):'Waiting for turn…'}</div><div class="muted mono" style="font-size:11.5px">${idx(a)} message${idx(a)==1?'':'s'}</div></div>`}).join('');
-const files=s.agents.filter(a=>a.next!==undefined).slice(1).map((a,i)=>[`${a.id}_output.${['md','js','py','html'][i%4]}`,a.role,idx(a)?'Ready':'Waiting']);
-const body=wtab==='Agents'?agCards+`<section class="card" style="margin-top:22px"><h2>Deliverables</h2>`+files.map(f=>`<div class="li"><span class="mono" style="flex:1">${f[0]}</span><span class="muted">${esc(f[1])}</span><span class="ch ${f[2]==='Ready'?'ch-ok':'ch-wait'}">${f[2]}</span></div>`).join('')+`<button class="btn" id="dl" style="margin-top:12px">Download transcript (.txt)</button></section>`
-:wtab==='Output files'?`<section class="card"><h2>Output files</h2>`+(files.map(f=>`<div class="li"><span class="mono" style="flex:1">${f[0]}</span><span class="ch ${f[2]==='Ready'?'ch-ok':'ch-wait'}">${f[2]}</span></div>`).join('')||'<p class="muted">None yet.</p>')+`</section>`
-:`<section class="card"><h2>Process log</h2><pre>${s.msgs.filter(m=>!m.me).map(m=>`[${mm(m.time||0)}] ${s.agents.find(a=>a.id===m.a)?.id}: ${esc(m.t.slice(0,90))}`).join('\n')||'(empty)'}</pre></section>`;
-const msgs=s.msgs.map(m=>{if(m.me)return `<div class="me">${esc(m.t)}</div>`;const i=s.agents.findIndex(a=>a.id===m.a),a=s.agents[i]||{role:'You'};const col=m.k==='bad'?'background:#FEE2E2;color:#991B1B':m.k==='ok'?'background:#DCFCE7;color:#166534':'background:#E0E7FF;color:#3730A3';return `<div class="m"><span class="av ${colorOf(i)}">${a.role[0]}</span><div><div><span class="mn">${esc(a.role)}</span><span class="mt">${mm(m.time||0)}</span></div><p class="mb">${esc(m.t)}</p>${m.tag?`<span class="tg" style="${col}">${esc(m.tag)}</span>`:''}</div></div>`}).join('')
- +(s.status==='running'&&!s.paused?'<div class="muted" style="font-size:13px">● ● ● agents working…</div>':'');
-return `<div class="row" style="align-items:flex-start;justify-content:space-between"><div style="flex:1 1 380px"><div class="row" style="gap:10px;margin-bottom:8px"><span class="ch ch-run">${esc(s.tplName)}</span><span class="muted" style="font-size:13px">Model: ${esc(s.model)}</span></div><h1 style="font-size:24px">${esc(s.goal)}</h1><p class="muted" id="wsub" style="margin:6px 0 0;font-size:13.5px">Step ${s.cursor} of ${s.script.length}. ${s.status==='done'?'Finished.':s.paused?'Paused.':'Working.'} ${mm(s.elapsed)} elapsed.</p></div>
-<div class="row" style="gap:10px"><button class="btn" id="pz" ${s.status==='done'?'disabled':''}>${s.paused?'▶ Resume':'❚❚ Pause'}</button><button class="btn" id="pdf">⬇ Export chat as PDF</button></div></div>
+let wtab = "Agents";
+V.workspace = (id) => {
+  const s = id
+    ? getSession(id)
+    : sessions().find((x) => x.status === "running") || sessions()[0];
+  if (!s)
+    return `<h1>Active workspace</h1><p class="muted">No session yet.</p><a class="btn btn-p" href="#/home">Start a session</a>`;
+  V._s = s.id;
+  const cur = s.script[s.cursor]?.a,
+    idx = (a) => s.msgs.filter((m) => m.a === a.id).length,
+    last = (a) => [...s.msgs].reverse().find((m) => m.a === a.id);
+  const pct = Math.round((s.cursor / s.script.length) * 100);
+  const state = (a) =>
+    s.status === "done"
+      ? ["ch-ok", "Done"]
+      : s.paused
+        ? ["ch-wait", "Paused"]
+        : cur === a.id
+          ? ["ch-run", "Working"]
+          : idx(a)
+            ? ["ch-ok", "Done"]
+            : ["ch-wait", "Waiting"];
+  const agCards = s.agents
+    .map((a, i) => {
+      const [c, l] = state(a),
+        m = last(a);
+      return (
+        (i ? '<div class="vl"></div>' : "") +
+        `<div class="ag ${cur === a.id && !s.paused && s.status === "running" ? "act" : ""}" style="max-width:460px;margin:0 auto;width:100%"><div class="ag-h"><span class="av ${colorOf(i)}">${a.role[0]}</span><div style="flex:1"><b>${esc(a.role)}</b><div class="muted" style="font-size:12.5px">${esc(a.desc)}</div></div><span class="ch ${c}">${l}</span></div><div class="ag-t">${m ? esc(m.t) : "Waiting for turn…"}</div><div class="muted mono" style="font-size:11.5px">${idx(a)} message${idx(a) == 1 ? "" : "s"}</div></div>`
+      );
+    })
+    .join("");
+  const files = s.agents
+    .filter((a) => a.next !== undefined)
+    .slice(1)
+    .map((a, i) => [
+      `${a.id}_output.${["md", "js", "py", "html"][i % 4]}`,
+      a.role,
+      idx(a) ? "Ready" : "Waiting",
+    ]);
+  const body =
+    wtab === "Agents"
+      ? agCards +
+        `<section class="card" style="margin-top:22px"><h2>Deliverables</h2>` +
+        files
+          .map(
+            (f) =>
+              `<div class="li"><span class="mono" style="flex:1">${f[0]}</span><span class="muted">${esc(f[1])}</span><span class="ch ${f[2] === "Ready" ? "ch-ok" : "ch-wait"}">${f[2]}</span></div>`,
+          )
+          .join("") +
+        `<button class="btn" id="dl" style="margin-top:12px">Download transcript (.txt)</button></section>`
+      : wtab === "Output files"
+        ? `<section class="card"><h2>Output files</h2>` +
+          (files
+            .map(
+              (f) =>
+                `<div class="li"><span class="mono" style="flex:1">${f[0]}</span><span class="ch ${f[2] === "Ready" ? "ch-ok" : "ch-wait"}">${f[2]}</span></div>`,
+            )
+            .join("") || '<p class="muted">None yet.</p>') +
+          `</section>`
+        : `<section class="card"><h2>Process log</h2><pre>${
+            s.msgs
+              .filter((m) => !m.me)
+              .map(
+                (m) =>
+                  `[${mm(m.time || 0)}] ${s.agents.find((a) => a.id === m.a)?.id}: ${esc(m.t.slice(0, 90))}`,
+              )
+              .join("\n") || "(empty)"
+          }</pre></section>`;
+  const msgs =
+    s.msgs
+      .map((m) => {
+        if (m.me) return `<div class="me">${esc(m.t)}</div>`;
+        const i = s.agents.findIndex((a) => a.id === m.a),
+          a = s.agents[i] || { role: "You" };
+        const col =
+          m.k === "bad"
+            ? "background:#FEE2E2;color:#991B1B"
+            : m.k === "ok"
+              ? "background:#DCFCE7;color:#166534"
+              : "background:#E0E7FF;color:#3730A3";
+        return `<div class="m"><span class="av ${colorOf(i)}">${a.role[0]}</span><div><div><span class="mn">${esc(a.role)}</span><span class="mt">${mm(m.time || 0)}</span></div><p class="mb">${esc(m.t)}</p>${m.tag ? `<span class="tg" style="${col}">${esc(m.tag)}</span>` : ""}</div></div>`;
+      })
+      .join("") +
+    (s.status === "running" && !s.paused
+      ? '<div class="muted" style="font-size:13px">● ● ● agents working…</div>'
+      : "");
+  return `<div class="row" style="align-items:flex-start;justify-content:space-between"><div style="flex:1 1 380px"><div class="row" style="gap:10px;margin-bottom:8px"><span class="ch ch-run">${esc(s.tplName)}</span><span class="muted" style="font-size:13px">Model: ${esc(s.model)}</span></div><h1 style="font-size:24px">${esc(s.goal)}</h1><p class="muted" id="wsub" style="margin:6px 0 0;font-size:13.5px">Step ${s.cursor} of ${s.script.length}. ${s.status === "done" ? "Finished." : s.paused ? "Paused." : "Working."} ${mm(s.elapsed)} elapsed.</p></div>
+<div class="row" style="gap:10px"><button class="btn" id="pz" ${s.status === "done" ? "disabled" : ""}>${s.paused ? "▶ Resume" : "❚❚ Pause"}</button><button class="btn" id="pdf">⬇ Export chat as PDF</button></div></div>
 <div class="bar" style="margin:16px 0 22px;height:8px"><i style="width:${pct}%"></i></div>
-<div class="row" style="align-items:flex-start;gap:20px"><section style="flex:3 1 440px;min-width:0"><div class="row" style="gap:8px;margin-bottom:16px">${['Agents','Output files','Process log'].map(t=>`<button class="tab ${wtab===t?'on':''}" data-w="${t}">${t}</button>`).join('')}</div>${body}</section>
-<aside class="chat" style="flex:2 1 380px;min-width:0"><div class="row" style="justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E8EBF2"><b>Team chat</b><span style="color:#166534;font-weight:600;font-size:12.5px">● ${s.status==='running'&&!s.paused?'Live':s.status==='done'?'Finished':'Paused'}</span></div><div class="msgs" id="msgs">${msgs}</div>
-<div class="col" style="padding:14px 18px 18px;border-top:1px solid #E8EBF2;gap:10px"><div class="row" style="gap:8px"><button class="q" data-q="Approved this step. Continue.">Approve this step</button><button class="q" data-q="Critic, please re-check the latest work.">Ask Critic to re-check</button><button class="q" data-q="Add a requirement: include a short README.">Add a requirement</button></div><div class="inp"><input id="fb" placeholder="Give feedback or ask the team a question"><button class="btn btn-p" id="snd" style="width:38px;padding:0">➤</button></div></div></aside></div>`};
-V.workspace.bind=()=>{const id=V._s;if(!id)return;const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight;
-$$('[data-w]').forEach(e=>e.onclick=()=>{wtab=e.dataset.w;render()});
-const send=t=>{if(!t.trim())return;patchSession(id,s=>{s.msgs.push({me:1,t});if(s.status==='done'){s.msgs.push({a:s.agents[s.agents.length-1].id,t:'Noted. Your feedback is recorded for the next revision.',time:s.elapsed,tag:'Acknowledged',k:'ok'})}else s.msgs.push({a:s.agents[0].id,t:'Got it, passing your note to the team.',time:s.elapsed})});render()};
-$('#snd').onclick=()=>send($('#fb').value);$('#fb').onkeydown=e=>{if(e.key==='Enter')send(e.target.value)};$$('[data-q]').forEach(b=>b.onclick=()=>send(b.dataset.q));
-$('#pz').onclick=()=>{patchSession(id,s=>s.paused=!s.paused);render()};$('#pdf').onclick=()=>pdfExport(getSession(id));
-const dl=$('#dl');if(dl)dl.onclick=()=>{const s=getSession(id),b=new Blob([s.msgs.map(m=>(m.me?'You':s.agents.find(a=>a.id===m.a)?.role)+': '+m.t).join('\n\n')],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='transcript.txt';a.click()};
-const s=getSession(id);if(s.status==='running')runSim(id,()=>{if(location.hash.startsWith('#/workspace'))render();else stopSim()})};
+<div class="row" style="align-items:flex-start;gap:20px"><section style="flex:3 1 440px;min-width:0"><div class="row" style="gap:8px;margin-bottom:16px">${["Agents", "Output files", "Process log"].map((t) => `<button class="tab ${wtab === t ? "on" : ""}" data-w="${t}">${t}</button>`).join("")}</div>${body}</section>
+<aside class="chat" style="flex:2 1 380px;min-width:0"><div class="row" style="justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E8EBF2"><b>Team chat</b><span style="color:#166534;font-weight:600;font-size:12.5px">● ${s.status === "running" && !s.paused ? "Live" : s.status === "done" ? "Finished" : "Paused"}</span></div><div class="msgs" id="msgs">${msgs}</div>
+<div class="col" style="padding:14px 18px 18px;border-top:1px solid #E8EBF2;gap:10px"><div class="row" style="gap:8px"><button class="q" data-q="Approved this step. Continue.">Approve this step</button><button class="q" data-q="Critic, please re-check the latest work.">Ask Critic to re-check</button><button class="q" data-q="Add a requirement: include a short README.">Add a requirement</button></div><div class="inp"><input id="fb" placeholder="Give feedback or ask the team a question"><button class="btn btn-p" id="snd" style="width:38px;padding:0">➤</button></div></div></aside></div>`;
+};
+V.workspace.bind = () => {
+  const id = V._s;
+  if (!id) return;
+  const m = $("#msgs");
+  if (m) m.scrollTop = m.scrollHeight;
+  $$("[data-w]").forEach(
+    (e) =>
+      (e.onclick = () => {
+        wtab = e.dataset.w;
+        render();
+      }),
+  );
+  const send = (t) => {
+    if (!t.trim()) return;
+    patchSession(id, (s) => {
+      s.msgs.push({ me: 1, t });
+      if (s.status === "done") {
+        s.msgs.push({
+          a: s.agents[s.agents.length - 1].id,
+          t: "Noted. Your feedback is recorded for the next revision.",
+          time: s.elapsed,
+          tag: "Acknowledged",
+          k: "ok",
+        });
+      } else
+        s.msgs.push({
+          a: s.agents[0].id,
+          t: "Got it, passing your note to the team.",
+          time: s.elapsed,
+        });
+    });
+    render();
+  };
+  $("#snd").onclick = () => send($("#fb").value);
+  $("#fb").onkeydown = (e) => {
+    if (e.key === "Enter") send(e.target.value);
+  };
+  $$("[data-q]").forEach((b) => (b.onclick = () => send(b.dataset.q)));
+  $("#pz").onclick = () => {
+    patchSession(id, (s) => (s.paused = !s.paused));
+    render();
+  };
+  $("#pdf").onclick = () => pdfExport(getSession(id));
+  const dl = $("#dl");
+  if (dl)
+    dl.onclick = () => {
+      const s = getSession(id),
+        b = new Blob(
+          [
+            s.msgs
+              .map(
+                (m) =>
+                  (m.me ? "You" : s.agents.find((a) => a.id === m.a)?.role) +
+                  ": " +
+                  m.t,
+              )
+              .join("\n\n"),
+          ],
+          { type: "text/plain" },
+        ),
+        a = document.createElement("a");
+      a.href = URL.createObjectURL(b);
+      a.download = "transcript.txt";
+      a.click();
+    };
+  const s = getSession(id);
+  if (s.status === "running")
+    runSim(id, () => {
+      if (location.hash.startsWith("#/workspace")) render();
+      else stopSim();
+    });
+};
 // ---------- TEMPLATE BUILDER ----------
-let draft=null;const newDraft=()=>({id:'',name:'Mobile App Team',cat:'Coding',desc:'Plans screens, builds them, and reviews the result before delivery.',max:3,agents:[A('planner','Planner','','builder','You break the goal into screens and tasks.'),A('builder','Builder','','critic','You write the app code for the tasks you are given.'),A('critic','Critic','',null,'You review the work against the goal. Reply APPROVED if there are none.')]});
-V.templates=()=>{draft=draft||newDraft();const d=draft,mine=DB.get('templates',[]),opts=(a)=>d.agents.filter(x=>x!==a).map(x=>`<option value="${esc(x.id)}" ${a.next===x.id?'selected':''}>${esc(x.id)}</option>`).join('')+`<option value="" ${!a.next?'selected':''}>Finish (no next agent)</option>`;
-const yaml=`id: ${d.name.toLowerCase().replace(/\W+/g,'-')}\nname: ${d.name}\nmax_rounds: ${d.max}\nagents:\n`+d.agents.map(a=>`  - id: ${a.id}\n    role: ${a.role}\n    system_prompt: "${a.prompt.slice(0,40).replace(/"/g,"'")}..."\n    next: ${a.next||'null'}`).join('\n');
-const ids=d.agents.map(a=>a.id),dup=ids.length!==new Set(ids).size||ids.some(i=>!i),bad=d.agents.some(a=>a.next&&!ids.includes(a.next));
-return `<div class="row" style="justify-content:space-between;margin-bottom:24px"><div><p class="muted" style="margin:0 0 6px"><a href="#/home">Templates</a> / ${d.id?'Edit':'New'} template</p><h1>Create a custom team template</h1></div><div class="row"><button class="btn" id="test">Test run</button><button class="btn btn-p" id="save">Save template</button></div></div>
-<div class="row" style="align-items:flex-start;gap:20px"><div style="flex:3 1 460px;min-width:0"><section class="card"><h2>Template details</h2><div class="row"><div class="fld" style="flex-basis:220px"><label>Name</label><input id="tn" value="${esc(d.name)}"></div><div class="fld"><label>Category</label><select id="tc">${['Coding','Research','Content','Business'].map(c=>`<option ${d.cat===c?'selected':''}>${c}</option>`).join('')}</select></div></div><div style="margin-top:14px"><label>Description</label><input id="td" value="${esc(d.desc)}"></div></section>
-<section class="card"><div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">Agents</h2><span class="muted" style="font-size:13px">Work flows top to bottom</span></div><div class="col">${d.agents.map((a,i)=>`<div class="agc" data-i="${i}"><div class="row" style="align-items:flex-end"><span class="av ${colorOf(i)}" style="margin-bottom:3px">${(a.role[0]||'?').toUpperCase()}</span><div class="fld"><label>Agent ID</label><input class="mono f-id" value="${esc(a.id)}"></div><div class="fld"><label>Role name</label><input class="f-role" value="${esc(a.role)}"></div><div class="fld"><label>Hands off to</label><select class="f-next">${opts(a)}</select></div><button class="btn btn-d f-del" ${d.agents.length<2?'disabled':''}>✕</button></div><div><label>System prompt</label><textarea class="f-prompt" rows="2">${esc(a.prompt)}</textarea></div></div>`).join('')}<button class="btn" id="add" style="border-style:dashed;border-color:#A5B4FC;color:#3730A3;background:#FAFAFF">+ Add agent</button></div>
+let draft = null;
+const newDraft = () => ({
+  id: "",
+  name: "Mobile App Team",
+  cat: "Coding",
+  desc: "Plans screens, builds them, and reviews the result before delivery.",
+  max: 3,
+  agents: [
+    A(
+      "planner",
+      "Planner",
+      "",
+      "builder",
+      "You break the goal into screens and tasks.",
+    ),
+    A(
+      "builder",
+      "Builder",
+      "",
+      "critic",
+      "You write the app code for the tasks you are given.",
+    ),
+    A(
+      "critic",
+      "Critic",
+      "",
+      null,
+      "You review the work against the goal. Reply APPROVED if there are none.",
+    ),
+  ],
+});
+V.templates = () => {
+  draft = draft || newDraft();
+  const d = draft,
+    mine = DB.get("templates", []),
+    opts = (a) =>
+      d.agents
+        .filter((x) => x !== a)
+        .map(
+          (x) =>
+            `<option value="${esc(x.id)}" ${a.next === x.id ? "selected" : ""}>${esc(x.id)}</option>`,
+        )
+        .join("") +
+      `<option value="" ${!a.next ? "selected" : ""}>Finish (no next agent)</option>`;
+  const yaml =
+    `id: ${d.name.toLowerCase().replace(/\W+/g, "-")}\nname: ${d.name}\nmax_rounds: ${d.max}\nagents:\n` +
+    d.agents
+      .map(
+        (a) =>
+          `  - id: ${a.id}\n    role: ${a.role}\n    system_prompt: "${a.prompt.slice(0, 40).replace(/"/g, "'")}..."\n    next: ${a.next || "null"}`,
+      )
+      .join("\n");
+  const ids = d.agents.map((a) => a.id),
+    dup = ids.length !== new Set(ids).size || ids.some((i) => !i),
+    bad = d.agents.some((a) => a.next && !ids.includes(a.next));
+  return `<div class="row" style="justify-content:space-between;margin-bottom:24px"><div><p class="muted" style="margin:0 0 6px"><a href="#/home">Templates</a> / ${d.id ? "Edit" : "New"} template</p><h1>Create a custom team template</h1></div><div class="row"><button class="btn" id="test">Test run</button><button class="btn btn-p" id="save">Save template</button></div></div>
+<div class="row" style="align-items:flex-start;gap:20px"><div style="flex:3 1 460px;min-width:0"><section class="card"><h2>Template details</h2><div class="row"><div class="fld" style="flex-basis:220px"><label>Name</label><input id="tn" value="${esc(d.name)}"></div><div class="fld"><label>Category</label><select id="tc">${["Coding", "Research", "Content", "Business"].map((c) => `<option ${d.cat === c ? "selected" : ""}>${c}</option>`).join("")}</select></div></div><div style="margin-top:14px"><label>Description</label><input id="td" value="${esc(d.desc)}"></div></section>
+<section class="card"><div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">Agents</h2><span class="muted" style="font-size:13px">Work flows top to bottom</span></div><div class="col">${d.agents.map((a, i) => `<div class="agc" data-i="${i}"><div class="row" style="align-items:flex-end"><span class="av ${colorOf(i)}" style="margin-bottom:3px">${(a.role[0] || "?").toUpperCase()}</span><div class="fld"><label>Agent ID</label><input class="mono f-id" value="${esc(a.id)}"></div><div class="fld"><label>Role name</label><input class="f-role" value="${esc(a.role)}"></div><div class="fld"><label>Hands off to</label><select class="f-next">${opts(a)}</select></div><button class="btn btn-d f-del" ${d.agents.length < 2 ? "disabled" : ""}>✕</button></div><div><label>System prompt</label><textarea class="f-prompt" rows="2">${esc(a.prompt)}</textarea></div></div>`).join("")}<button class="btn" id="add" style="border-style:dashed;border-color:#A5B4FC;color:#3730A3;background:#FAFAFF">+ Add agent</button></div>
 <div class="row" style="margin-top:18px;padding-top:16px;border-top:1px solid #E8EBF2"><div class="fld"><label>Max revision rounds</label><input id="mr" type="number" min="1" max="10" value="${d.max}"></div><div class="fld"><label>Stop when</label><select><option>Critic replies APPROVED</option></select></div></div></section></div>
-<aside style="flex:2 1 380px;min-width:0"><section class="card"><div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">Flow preview</h2><span class="ch ${dup||bad?'ch-bad':'ch-ok'}">${dup?'Duplicate/empty IDs':bad?'Bad hand-off':'✓ Schema valid'}</span></div><div class="row" style="gap:8px">${d.agents.map((a,i)=>`<span class="node"><span class="av ${colorOf(i)}">${(a.role[0]||'?').toUpperCase()}</span>${esc(a.role)}</span>${i<d.agents.length-1?'<span class="arr">→</span>':''}`).join('')}</div><div style="margin-top:14px;padding:10px 14px;border:1px dashed #D6A24A;border-radius:10px;background:#FFFBEB;font-size:13px;color:#7A3E0B">If the Critic finds problems, the work goes back to the previous agent. This repeats up to ${d.max} times.</div></section>
+<aside style="flex:2 1 380px;min-width:0"><section class="card"><div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">Flow preview</h2><span class="ch ${dup || bad ? "ch-bad" : "ch-ok"}">${dup ? "Duplicate/empty IDs" : bad ? "Bad hand-off" : "✓ Schema valid"}</span></div><div class="row" style="gap:8px">${d.agents.map((a, i) => `<span class="node"><span class="av ${colorOf(i)}">${(a.role[0] || "?").toUpperCase()}</span>${esc(a.role)}</span>${i < d.agents.length - 1 ? '<span class="arr">→</span>' : ""}`).join("")}</div><div style="margin-top:14px;padding:10px 14px;border:1px dashed #D6A24A;border-radius:10px;background:#FFFBEB;font-size:13px;color:#7A3E0B">If the Critic finds problems, the work goes back to the previous agent. This repeats up to ${d.max} times.</div></section>
 <section class="card"><h2>Template file (YAML)</h2><pre>${esc(yaml)}</pre><p class="muted" style="font-size:13px;margin:12px 0 0">Saved templates appear on Home next to the built-in teams.</p></section>
-<section class="card"><h2>Your saved templates</h2>${mine.map(t=>`<div class="li"><b style="flex:1">${esc(t.name)}</b><button class="btn" data-e="${t.id}">Edit</button><button class="btn btn-d" data-x="${t.id}">Delete</button></div>`).join('')||'<p class="muted" style="margin:0">None yet.</p>'}</section></aside></div>`};
-V.templates.bind=()=>{const d=draft,sync=()=>{d.name=$('#tn').value;d.cat=$('#tc').value;d.desc=$('#td').value;d.max=Math.max(1,+$('#mr').value||1);$$('.agc').forEach(c=>{const a=d.agents[+c.dataset.i];a.id=$('.f-id',c).value.trim();a.role=$('.f-role',c).value;a.next=$('.f-next',c).value||null;a.prompt=$('.f-prompt',c).value})};
-$$('input,select,textarea',$('#view')).forEach(e=>e.onchange=()=>{sync();render()});
-$('#add').onclick=()=>{sync();d.agents.push(A('agent'+(d.agents.length+1),'New Agent','',null,'Describe what this agent does.'));render()};
-$$('.f-del').forEach(b=>b.onclick=()=>{sync();const i=+b.closest('.agc').dataset.i,gone=d.agents[i].id;d.agents.splice(i,1);d.agents.forEach(a=>{if(a.next===gone)a.next=null});render()});
-$('#save').onclick=()=>{sync();const ids=d.agents.map(a=>a.id);if(!d.name.trim())return toast('Name is required.');if(ids.some(i=>!i)||ids.length!==new Set(ids).size)return toast('Agent IDs must be unique and non-empty.');if(d.agents.some(a=>a.next&&!ids.includes(a.next)))return toast('A hand-off points to a missing agent.');
-const all=DB.get('templates',[]);d.id=d.id||'u'+uid();d.agents.forEach(a=>a.desc=a.desc||a.role);const i=all.findIndex(t=>t.id===d.id);i<0?all.push(d):all[i]=d;DB.set('templates',all);toast('Template saved');draft=null;hs.tpl=d.id;location.hash='#/home'};
-$('#test').onclick=()=>{sync();const g=prompt('Test goal:','Build a simple notes app');if(!g)return;const s=createSession(g,'__t',[]);};
-$$('[data-e]').forEach(b=>b.onclick=()=>{draft=JSON.parse(JSON.stringify(getTpl(b.dataset.e)));render()});$$('[data-x]').forEach(b=>b.onclick=()=>{DB.set('templates',DB.get('templates',[]).filter(t=>t.id!==b.dataset.x));if(draft?.id===b.dataset.x)draft=null;render()})};
+<section class="card"><h2>Your saved templates</h2>${mine.map((t) => `<div class="li"><b style="flex:1">${esc(t.name)}</b><button class="btn" data-e="${t.id}">Edit</button><button class="btn btn-d" data-x="${t.id}">Delete</button></div>`).join("") || '<p class="muted" style="margin:0">None yet.</p>'}</section></aside></div>`;
+};
+V.templates.bind = () => {
+  const d = draft,
+    sync = () => {
+      d.name = $("#tn").value;
+      d.cat = $("#tc").value;
+      d.desc = $("#td").value;
+      d.max = Math.max(1, +$("#mr").value || 1);
+      $$(".agc").forEach((c) => {
+        const a = d.agents[+c.dataset.i];
+        a.id = $(".f-id", c).value.trim();
+        a.role = $(".f-role", c).value;
+        a.next = $(".f-next", c).value || null;
+        a.prompt = $(".f-prompt", c).value;
+      });
+    };
+  $$("input,select,textarea", $("#view")).forEach(
+    (e) =>
+      (e.onchange = () => {
+        sync();
+        render();
+      }),
+  );
+  $("#add").onclick = () => {
+    sync();
+    d.agents.push(
+      A(
+        "agent" + (d.agents.length + 1),
+        "New Agent",
+        "",
+        null,
+        "Describe what this agent does.",
+      ),
+    );
+    render();
+  };
+  $$(".f-del").forEach(
+    (b) =>
+      (b.onclick = () => {
+        sync();
+        const i = +b.closest(".agc").dataset.i,
+          gone = d.agents[i].id;
+        d.agents.splice(i, 1);
+        d.agents.forEach((a) => {
+          if (a.next === gone) a.next = null;
+        });
+        render();
+      }),
+  );
+  $("#save").onclick = () => {
+    sync();
+    const ids = d.agents.map((a) => a.id);
+    if (!d.name.trim()) return toast("Name is required.");
+    if (ids.some((i) => !i) || ids.length !== new Set(ids).size)
+      return toast("Agent IDs must be unique and non-empty.");
+    if (d.agents.some((a) => a.next && !ids.includes(a.next)))
+      return toast("A hand-off points to a missing agent.");
+    const all = DB.get("templates", []);
+    d.id = d.id || "u" + uid();
+    d.agents.forEach((a) => (a.desc = a.desc || a.role));
+    const i = all.findIndex((t) => t.id === d.id);
+    i < 0 ? all.push(d) : (all[i] = d);
+    DB.set("templates", all);
+    toast("Template saved");
+    draft = null;
+    hs.tpl = d.id;
+    location.hash = "#/home";
+  };
+  $("#test").onclick = () => {
+    sync();
+    const g = prompt("Test goal:", "Build a simple notes app");
+    if (!g) return;
+    const s = createSession(g, "__t", []);
+  };
+  $$("[data-e]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        draft = JSON.parse(JSON.stringify(getTpl(b.dataset.e)));
+        render();
+      }),
+  );
+  $$("[data-x]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        DB.set(
+          "templates",
+          DB.get("templates", []).filter((t) => t.id !== b.dataset.x),
+        );
+        if (draft?.id === b.dataset.x) draft = null;
+        render();
+      }),
+  );
+};
 // test run: run unsaved draft
-const _cs=createSession;createSession=function(g,t,d){if(t==='__t'){const tp=draft;const s={id:uid(),goal:g,tpl:'draft',tplName:tp.name+' (test)',agents:JSON.parse(JSON.stringify(tp.agents)),model:'Groq',created:Date.now(),status:'running',cursor:0,elapsed:0,paused:false,docs:[],script:makeScript(tp,g),msgs:[{me:1,t:g}]};const all=sessions();all.unshift(s);saveSessions(all);location.hash='#/workspace/'+s.id;return s}return _cs(g,t,d)};
+const _cs = createSession;
+createSession = function (g, t, d) {
+  if (t === "__t") {
+    const tp = draft;
+    const s = {
+      id: uid(),
+      goal: g,
+      tpl: "draft",
+      tplName: tp.name + " (test)",
+      agents: JSON.parse(JSON.stringify(tp.agents)),
+      model: "Groq",
+      created: Date.now(),
+      status: "running",
+      cursor: 0,
+      elapsed: 0,
+      paused: false,
+      docs: [],
+      script: makeScript(tp, g),
+      msgs: [{ me: 1, t: g }],
+    };
+    const all = sessions();
+    all.unshift(s);
+    saveSessions(all);
+    location.hash = "#/workspace/" + s.id;
+    return s;
+  }
+  return _cs(g, t, d);
+};
 // ---------- HISTORY ----------
-let hf={q:'',f:'All',new:true};
-V.history=()=>{let l=sessions().filter(s=>(hf.f==='All'||(hf.f==='Running'&&s.status==='running')||(hf.f==='Done'&&s.status==='done'))&&(s.goal+s.tplName).toLowerCase().includes(hf.q.toLowerCase()));if(!hf.new)l=[...l].reverse();
-return `<h1>Session history</h1><p class="muted" style="margin:6px 0 22px">Every chat is saved, so you can reopen it, continue it, or export it as a PDF.</p><div class="row" style="margin-bottom:16px"><input id="hq" placeholder="Search by goal or template" value="${esc(hf.q)}" style="max-width:340px">${['All','Running','Done'].map(f=>`<button class="tab ${hf.f===f?'on':''}" data-f="${f}">${f}</button>`).join('')}<span class="sp"></span><button class="btn" id="ord">${hf.new?'Newest first':'Oldest first'}</button></div>
-<section class="list">${l.map(s=>`<div class="li"><div style="flex:2 1 260px"><div class="t1">${esc(s.goal)}</div><div class="t2">${ago(s.created)} · ${esc(s.tplName)} · ${esc(s.model)}</div></div><span class="mono" style="font-size:12.5px">${s.msgs.length} msgs · ${mm(s.elapsed)}</span>${chip(s.paused?'paused':s.status)}<a class="btn" href="#/workspace/${s.id}">Open</a><button class="btn" data-p="${s.id}" title="Export PDF">⬇</button><button class="btn btn-d" data-d="${s.id}" title="Delete">🗑</button></div>`).join('')||'<div class="li muted">No sessions match.</div>'}</section><p class="muted" style="font-size:13.5px;margin-top:14px">Showing ${l.length} of ${sessions().length} sessions</p>`};
-V.history.bind=()=>{$('#hq').oninput=e=>{hf.q=e.target.value;const p=e.target.selectionStart;render();const i=$('#hq');i.focus();i.setSelectionRange(p,p)};$$('[data-f]').forEach(b=>b.onclick=()=>{hf.f=b.dataset.f;render()});$('#ord').onclick=()=>{hf.new=!hf.new;render()};
-$$('[data-p]').forEach(b=>b.onclick=()=>pdfExport(getSession(b.dataset.p)));$$('[data-d]').forEach(b=>b.onclick=()=>{if(confirm('Delete this session?')){saveSessions(sessions().filter(s=>s.id!==b.dataset.d));render()}})};
+let hf = { q: "", f: "All", new: true };
+V.history = () => {
+  let l = sessions().filter(
+    (s) =>
+      (hf.f === "All" ||
+        (hf.f === "Running" && s.status === "running") ||
+        (hf.f === "Done" && s.status === "done")) &&
+      (s.goal + s.tplName).toLowerCase().includes(hf.q.toLowerCase()),
+  );
+  if (!hf.new) l = [...l].reverse();
+  return `<h1>Session history</h1><p class="muted" style="margin:6px 0 22px">Every chat is saved, so you can reopen it, continue it, or export it as a PDF.</p><div class="row" style="margin-bottom:16px"><input id="hq" placeholder="Search by goal or template" value="${esc(hf.q)}" style="max-width:340px">${["All", "Running", "Done"].map((f) => `<button class="tab ${hf.f === f ? "on" : ""}" data-f="${f}">${f}</button>`).join("")}<span class="sp"></span><button class="btn" id="ord">${hf.new ? "Newest first" : "Oldest first"}</button></div>
+<section class="list">${l.map((s) => `<div class="li"><div style="flex:2 1 260px"><div class="t1">${esc(s.goal)}</div><div class="t2">${ago(s.created)} · ${esc(s.tplName)} · ${esc(s.model)}</div></div><span class="mono" style="font-size:12.5px">${s.msgs.length} msgs · ${mm(s.elapsed)}</span>${chip(s.paused ? "paused" : s.status)}<a class="btn" href="#/workspace/${s.id}">Open</a><button class="btn" data-p="${s.id}" title="Export PDF">⬇</button><button class="btn btn-d" data-d="${s.id}" title="Delete">🗑</button></div>`).join("") || '<div class="li muted">No sessions match.</div>'}</section><p class="muted" style="font-size:13.5px;margin-top:14px">Showing ${l.length} of ${sessions().length} sessions</p>`;
+};
+V.history.bind = () => {
+  $("#hq").oninput = (e) => {
+    hf.q = e.target.value;
+    const p = e.target.selectionStart;
+    render();
+    const i = $("#hq");
+    i.focus();
+    i.setSelectionRange(p, p);
+  };
+  $$("[data-f]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        hf.f = b.dataset.f;
+        render();
+      }),
+  );
+  $("#ord").onclick = () => {
+    hf.new = !hf.new;
+    render();
+  };
+  $$("[data-p]").forEach(
+    (b) => (b.onclick = () => pdfExport(getSession(b.dataset.p))),
+  );
+  $$("[data-d]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        if (confirm("Delete this session?")) {
+          saveSessions(sessions().filter((s) => s.id !== b.dataset.d));
+          render();
+        }
+      }),
+  );
+};
 // ---------- DOCUMENTS ----------
-const ft=n=>{const e=n.split('.').pop().toLowerCase();return {pdf:['PDF','#FEE2E2','#991B1B'],csv:['CSV','#DCFCE7','#166534'],docx:['DOC','#E0E7FF','#3730A3'],txt:['TXT','#EEF1F6','#334155']}[e]||['FILE','#EEF1F6','#334155']};
-const sz=b=>b>1e6?(b/1e6).toFixed(1)+' MB':Math.max(1,Math.round(b/1e3))+' KB';
-V.documents=()=>{const d=DB.get('docs',[]),used=d.reduce((a,x)=>a+x.size,0),lim=500e6;
-return `<h1>Documents</h1><p class="muted" style="margin:6px 0 22px">Upload notes, specs or data once, then attach them to any session so the agents can use them.</p><div class="row" style="align-items:flex-start;gap:20px"><div style="flex:3 1 460px;min-width:0">
+const ft = (n) => {
+  const e = n.split(".").pop().toLowerCase();
+  return (
+    {
+      pdf: ["PDF", "#FEE2E2", "#991B1B"],
+      csv: ["CSV", "#DCFCE7", "#166534"],
+      docx: ["DOC", "#E0E7FF", "#3730A3"],
+      txt: ["TXT", "#EEF1F6", "#334155"],
+    }[e] || ["FILE", "#EEF1F6", "#334155"]
+  );
+};
+const sz = (b) =>
+  b > 1e6
+    ? (b / 1e6).toFixed(1) + " MB"
+    : Math.max(1, Math.round(b / 1e3)) + " KB";
+V.documents = () => {
+  const d = DB.get("docs", []),
+    used = d.reduce((a, x) => a + x.size, 0),
+    lim = 500e6;
+  return `<h1>Documents</h1><p class="muted" style="margin:6px 0 22px">Upload notes, specs or data once, then attach them to any session so the agents can use them.</p><div class="row" style="align-items:flex-start;gap:20px"><div style="flex:3 1 460px;min-width:0">
 <div class="drop" id="drop"><div style="font-size:26px">⬆</div><b>Drop files here, or <a href="#" id="br">browse your computer</a></b><div class="muted" style="font-size:13px;margin-top:6px">PDF, DOCX, TXT or CSV, up to 20 MB each</div><input id="fi" type="file" multiple accept=".pdf,.docx,.txt,.csv" hidden></div>
-<section class="list" style="margin-top:20px"><div class="li" style="justify-content:space-between"><b>Your files</b><span class="muted">${d.length} file${d.length==1?'':'s'}</span></div>${d.map(x=>{const t=ft(x.name);return `<div class="li"><span class="fi" style="background:${t[1]};color:${t[2]}">${t[0]}</span><div style="flex:1 1 220px;min-width:0"><div class="t1">${esc(x.name)}</div><div class="t2">${sz(x.size)}, uploaded ${ago(x.at)}</div></div><button class="btn" data-a="${x.id}">${x.on?'✓ Attached':'Attach'}</button><button class="btn btn-d" data-r="${x.id}">Delete</button></div>`}).join('')||'<div class="li muted">No files yet.</div>'}</section></div>
-<aside style="flex:1.2 1 320px"><section class="card"><h2>Storage</h2><div class="bar" style="height:8px"><i style="width:${Math.max(1,used/lim*100)}%"></i></div><div class="row" style="justify-content:space-between;margin-top:10px;font-size:13px;color:#586174"><span>${sz(used)} used</span><span>500 MB limit</span></div></section>
-<section class="card"><h2>Attached to the next session</h2>${d.map(x=>`<div class="tgl"><span>${esc(x.name)}</span><button class="sw ${x.on?'on':''}" data-a="${x.id}" aria-label="toggle"></button></div>`).join('')||'<p class="muted" style="margin:0">Upload a file to attach it.</p>'}<a class="btn btn-p" href="#/home" style="width:100%;margin-top:14px">Back to Home</a></section></aside></div>`};
-V.documents.bind=()=>{const add=fs=>{const d=DB.get('docs',[]);[...fs].forEach(f=>{if(f.size>20e6)return toast(f.name+' is over 20 MB');if(!/\.(pdf|docx|txt|csv)$/i.test(f.name))return toast(f.name+': unsupported type');d.push({id:uid(),name:f.name,size:f.size,at:Date.now(),on:false})});DB.set('docs',d);render()};
-const dr=$('#drop');$('#br').onclick=e=>{e.preventDefault();$('#fi').click()};$('#fi').onchange=e=>add(e.target.files);dr.ondragover=e=>{e.preventDefault();dr.classList.add('over')};dr.ondragleave=()=>dr.classList.remove('over');dr.ondrop=e=>{e.preventDefault();add(e.dataTransfer.files)};
-$$('[data-a]').forEach(b=>b.onclick=()=>{const d=DB.get('docs',[]),x=d.find(i=>i.id===b.dataset.a);x.on=!x.on;DB.set('docs',d);render()});$$('[data-r]').forEach(b=>b.onclick=()=>{DB.set('docs',DB.get('docs',[]).filter(x=>x.id!==b.dataset.r));render()})};
+<section class="list" style="margin-top:20px"><div class="li" style="justify-content:space-between"><b>Your files</b><span class="muted">${d.length} file${d.length == 1 ? "" : "s"}</span></div>${
+    d
+      .map((x) => {
+        const t = ft(x.name);
+        return `<div class="li"><span class="fi" style="background:${t[1]};color:${t[2]}">${t[0]}</span><div style="flex:1 1 220px;min-width:0"><div class="t1">${esc(x.name)}</div><div class="t2">${sz(x.size)}, uploaded ${ago(x.at)}</div></div><button class="btn" data-a="${x.id}">${x.on ? "✓ Attached" : "Attach"}</button><button class="btn btn-d" data-r="${x.id}">Delete</button></div>`;
+      })
+      .join("") || '<div class="li muted">No files yet.</div>'
+  }</section></div>
+<aside style="flex:1.2 1 320px"><section class="card"><h2>Storage</h2><div class="bar" style="height:8px"><i style="width:${Math.max(1, (used / lim) * 100)}%"></i></div><div class="row" style="justify-content:space-between;margin-top:10px;font-size:13px;color:#586174"><span>${sz(used)} used</span><span>500 MB limit</span></div></section>
+<section class="card"><h2>Attached to the next session</h2>${d.map((x) => `<div class="tgl"><span>${esc(x.name)}</span><button class="sw ${x.on ? "on" : ""}" data-a="${x.id}" aria-label="toggle"></button></div>`).join("") || '<p class="muted" style="margin:0">Upload a file to attach it.</p>'}<a class="btn btn-p" href="#/home" style="width:100%;margin-top:14px">Back to Home</a></section></aside></div>`;
+};
+V.documents.bind = () => {
+  const add = (fs) => {
+    const d = DB.get("docs", []);
+    [...fs].forEach((f) => {
+      if (f.size > 20e6) return toast(f.name + " is over 20 MB");
+      if (!/\.(pdf|docx|txt|csv)$/i.test(f.name))
+        return toast(f.name + ": unsupported type");
+      d.push({
+        id: uid(),
+        name: f.name,
+        size: f.size,
+        at: Date.now(),
+        on: false,
+      });
+    });
+    DB.set("docs", d);
+    render();
+  };
+  const dr = $("#drop");
+  $("#br").onclick = (e) => {
+    e.preventDefault();
+    $("#fi").click();
+  };
+  $("#fi").onchange = (e) => add(e.target.files);
+  dr.ondragover = (e) => {
+    e.preventDefault();
+    dr.classList.add("over");
+  };
+  dr.ondragleave = () => dr.classList.remove("over");
+  dr.ondrop = (e) => {
+    e.preventDefault();
+    add(e.dataTransfer.files);
+  };
+  $$("[data-a]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        const d = DB.get("docs", []),
+          x = d.find((i) => i.id === b.dataset.a);
+        x.on = !x.on;
+        DB.set("docs", d);
+        render();
+      }),
+  );
+  $$("[data-r]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        DB.set(
+          "docs",
+          DB.get("docs", []).filter((x) => x.id !== b.dataset.r),
+        );
+        render();
+      }),
+  );
+};
 // ---------- SETTINGS ----------
-V.settings=()=>{const s=settings(),P=[['groq','Groq','Primary','c5','API key','password',['Llama 3.3 70B','Mixtral 8x7B']],['gemini','Google Gemini','Secondary','c1','API key','password',['Gemini 2.0 Flash','Gemini 1.5 Pro']],['local','Local model','Offline backup','c4','Server address','text',['Qwen 2.5 3B','Llama 3.2 3B']]];
-const tg=(k,t,sm)=>`<div class="tgl"><div>${t}<small>${sm}</small></div><button class="sw ${s[k]?'on':''}" data-s="${k}" aria-label="${t}"></button></div>`;
-return `<div class="row" style="justify-content:space-between;margin-bottom:24px"><div><h1>Settings</h1><p class="muted" style="margin:6px 0 0">Choose which models power your agents, and what happens when one is unavailable.</p></div><button class="btn btn-p" id="sv">Save changes</button></div><div style="max-width:960px">
-<section class="card"><h2>Model providers</h2><p class="sub">Agents call these in order. Keys stay on this device.</p>${P.map(([k,n,r,c,kl,kt,ms])=>`<div class="row" style="padding:16px 0;border-top:1px solid #E8EBF2;align-items:flex-end"><span class="av ${c}" style="border-radius:10px;width:40px;height:40px">${n[0]}</span><div style="flex:1 1 150px"><b>${n}</b><div><span class="ch ${s.providers[k].key?'ch-ok':'ch-wait'}" id="st-${k}">${s.providers[k].key?'Connected':'Not set'}</span> <span class="muted" style="font-size:12.5px">${r}</span></div></div><div class="fld"><label>${kl}</label><input data-k="${k}" type="${kt}" value="${esc(s.providers[k].key)}"></div><div class="fld"><label>Model</label><select data-m="${k}">${ms.map(m=>`<option ${s.providers[k].model===m?'selected':''}>${m}</option>`).join('')}</select></div><button class="btn" data-t="${k}">Test</button></div>`).join('')}</section>
-<section class="card"><h2>When a model is unavailable</h2><p class="sub">Keep sessions running when you hit an API limit or lose your connection.</p>${tg('toGemini','Switch to Gemini when Groq hits its rate limit','The conversation continues with the same agents and history.')}${tg('toLocal','Switch to the local model when offline','Slower, but needs no internet or API key.')}${tg('ask','Ask me before switching models','Show a prompt instead of switching automatically.')}</section>
-<div class="row" style="align-items:stretch"><section class="card" style="flex:1 1 380px"><h2>Session defaults</h2><p class="sub">Used when you start a new session.</p><label>Default team</label><select id="dt"><option value="auto">Auto-select</option>${allTemplates().map(t=>`<option value="${t.id}" ${s.team===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}</select><label style="margin-top:14px">Max revision rounds</label><input id="dr" type="number" min="1" max="10" value="${s.rounds}"></section>
-<section class="card" style="flex:1 1 380px"><h2>PDF export</h2><p class="sub">How exported chats look.</p><label>Page size</label><select id="ps"><option ${s.page==='A4'?'selected':''}>A4</option><option ${s.page==='Letter'?'selected':''}>Letter</option></select>${tg('stamps','Include agent names and timestamps','')}</section></div>
-<section class="card"><h2>Account</h2><p class="sub">Sign-in details for this workspace.</p><div class="row"><div class="fld"><label>Display name</label><input id="an" value="${esc(me.name)}"></div><div class="fld"><label>Email</label><input value="${esc(me.email)}" disabled></div></div><div class="row" style="margin-top:18px"><button class="btn" id="cp">Change password</button><button class="btn" id="so">Sign out</button><button class="btn btn-d" id="wipe">Delete all my data</button></div></section></div>`};
-V.settings.bind=()=>{const s=settings();$$('[data-s]').forEach(b=>b.onclick=()=>{s[b.dataset.s]=!s[b.dataset.s];DB.set('settings',s);render()});
-$('#sv').onclick=()=>{$$('[data-k]').forEach(i=>s.providers[i.dataset.k].key=i.value.trim());$$('[data-m]').forEach(i=>s.providers[i.dataset.m].model=i.value);s.team=$('#dt').value;s.rounds=Math.max(1,+$('#dr').value||3);s.page=$('#ps').value;DB.set('settings',s);me.name=$('#an').value.trim()||me.name;DB.set('me',me);toast('Settings saved');render()};
-$$('[data-t]').forEach(b=>b.onclick=()=>{const k=b.dataset.t,v=$(`[data-k=${k}]`).value.trim();toast(v?(k==='local'&&!/^https?:\/\//.test(v)?'Enter a valid http(s) address':'Connection test passed (demo)'):'Enter a key or address first')});
-$('#cp').onclick=()=>{const p=prompt('New password (min 8 chars):');if(p&&p.length>=8){const u=DB.get('users',{});if(u[me.email])u[me.email].pw=p;DB.set('users',u);toast('Password changed')}else if(p)toast('Too short')};
-$('#so').onclick=()=>{localStorage.removeItem('aic_me');location.href='index.html'};$('#wipe').onclick=()=>{if(confirm('Delete ALL data on this device?')){Object.keys(localStorage).filter(k=>k.startsWith('aic_')).forEach(k=>localStorage.removeItem(k));location.href='index.html'}}};
+V.settings = () => {
+  const s = settings(),
+    P = [
+      [
+        "groq",
+        "Groq",
+        "Primary",
+        "c5",
+        "API key",
+        "password",
+        ["Llama 3.3 70B", "Mixtral 8x7B"],
+      ],
+      [
+        "gemini",
+        "Google Gemini",
+        "Secondary",
+        "c1",
+        "API key",
+        "password",
+        ["Gemini 2.0 Flash", "Gemini 1.5 Pro"],
+      ],
+      [
+        "local",
+        "Local model",
+        "Offline backup",
+        "c4",
+        "Server address",
+        "text",
+        ["Qwen 2.5 3B", "Llama 3.2 3B"],
+      ],
+    ];
+  const tg = (k, t, sm) =>
+    `<div class="tgl"><div>${t}<small>${sm}</small></div><button class="sw ${s[k] ? "on" : ""}" data-s="${k}" aria-label="${t}"></button></div>`;
+  return `<div class="row" style="justify-content:space-between;margin-bottom:24px"><div><h1>Settings</h1><p class="muted" style="margin:6px 0 0">Choose which models power your agents, and what happens when one is unavailable.</p></div><button class="btn btn-p" id="sv">Save changes</button></div><div style="max-width:960px">
+<section class="card"><h2>Model providers</h2><p class="sub">Agents call these in order. Keys stay on this device.</p>${P.map(([k, n, r, c, kl, kt, ms]) => `<div class="row" style="padding:16px 0;border-top:1px solid #E8EBF2;align-items:flex-end"><span class="av ${c}" style="border-radius:10px;width:40px;height:40px">${n[0]}</span><div style="flex:1 1 150px"><b>${n}</b><div><span class="ch ${s.providers[k].key ? "ch-ok" : "ch-wait"}" id="st-${k}">${s.providers[k].key ? "Connected" : "Not set"}</span> <span class="muted" style="font-size:12.5px">${r}</span></div></div><div class="fld"><label>${kl}</label><input data-k="${k}" type="${kt}" value="${esc(s.providers[k].key)}"></div><div class="fld"><label>Model</label><select data-m="${k}">${ms.map((m) => `<option ${s.providers[k].model === m ? "selected" : ""}>${m}</option>`).join("")}</select></div><button class="btn" data-t="${k}">Test</button></div>`).join("")}</section>
+<section class="card"><h2>When a model is unavailable</h2><p class="sub">Keep sessions running when you hit an API limit or lose your connection.</p>${tg("toGemini", "Switch to Gemini when Groq hits its rate limit", "The conversation continues with the same agents and history.")}${tg("toLocal", "Switch to the local model when offline", "Slower, but needs no internet or API key.")}${tg("ask", "Ask me before switching models", "Show a prompt instead of switching automatically.")}</section>
+<div class="row" style="align-items:stretch"><section class="card" style="flex:1 1 380px"><h2>Session defaults</h2><p class="sub">Used when you start a new session.</p><label>Default team</label><select id="dt"><option value="auto">Auto-select</option>${allTemplates()
+    .map(
+      (t) =>
+        `<option value="${t.id}" ${s.team === t.id ? "selected" : ""}>${esc(t.name)}</option>`,
+    )
+    .join(
+      "",
+    )}</select><label style="margin-top:14px">Max revision rounds</label><input id="dr" type="number" min="1" max="10" value="${s.rounds}"></section>
+<section class="card" style="flex:1 1 380px"><h2>PDF export</h2><p class="sub">How exported chats look.</p><label>Page size</label><select id="ps"><option ${s.page === "A4" ? "selected" : ""}>A4</option><option ${s.page === "Letter" ? "selected" : ""}>Letter</option></select>${tg("stamps", "Include agent names and timestamps", "")}</section></div>
+<section class="card"><h2>Account</h2><p class="sub">Sign-in details for this workspace.</p><div class="row"><div class="fld"><label>Display name</label><input id="an" value="${esc(me.name)}"></div><div class="fld"><label>Email</label><input value="${esc(me.email)}" disabled></div></div><div class="row" style="margin-top:18px"><button class="btn" id="cp">Change password</button><button class="btn" id="so">Sign out</button><button class="btn btn-d" id="wipe">Delete all my data</button></div></section></div>`;
+};
+V.settings.bind = () => {
+  const s = settings();
+  $$("[data-s]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        s[b.dataset.s] = !s[b.dataset.s];
+        DB.set("settings", s);
+        render();
+      }),
+  );
+  $("#sv").onclick = () => {
+    $$("[data-k]").forEach(
+      (i) => (s.providers[i.dataset.k].key = i.value.trim()),
+    );
+    $$("[data-m]").forEach((i) => (s.providers[i.dataset.m].model = i.value));
+    s.team = $("#dt").value;
+    s.rounds = Math.max(1, +$("#dr").value || 3);
+    s.page = $("#ps").value;
+    DB.set("settings", s);
+    me.name = $("#an").value.trim() || me.name;
+    DB.set("me", me);
+    toast("Settings saved");
+    render();
+  };
+  $$("[data-t]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        const k = b.dataset.t,
+          v = $(`[data-k=${k}]`).value.trim();
+        toast(
+          v
+            ? k === "local" && !/^https?:\/\//.test(v)
+              ? "Enter a valid http(s) address"
+              : "Connection test passed (demo)"
+            : "Enter a key or address first",
+        );
+      }),
+  );
+  $("#cp").onclick = () => {
+    const p = prompt("New password (min 8 chars):");
+    if (p && p.length >= 8) {
+      const u = DB.get("users", {});
+      if (u[me.email]) u[me.email].pw = p;
+      DB.set("users", u);
+      toast("Password changed");
+    } else if (p) toast("Too short");
+  };
+  $("#so").onclick = () => {
+    localStorage.removeItem("aic_me");
+    location.href = "index.html";
+  };
+  $("#wipe").onclick = () => {
+    if (confirm("Delete ALL data on this device?")) {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith("aic_"))
+        .forEach((k) => localStorage.removeItem(k));
+      location.href = "index.html";
+    }
+  };
+};
 // ---------- ROUTER ----------
-function render(){const[,r='home',id]=location.hash.split('/');const v=V[r]?r:'home';if(v!=='workspace')stopSim();side(v);const keep=window.scrollY;$('#view').innerHTML=V[v](id);V[v].bind&&V[v].bind(id);window.scrollTo(0,keep)}
-addEventListener('hashchange',()=>{window.scrollTo(0,0);render()});if(!location.hash)location.hash='#/home';else render();
+function render() {
+  const [, r = "home", id] = location.hash.split("/");
+  const v = V[r] ? r : "home";
+  if (v !== "workspace") stopSim();
+  side(v);
+  const keep = window.scrollY;
+  $("#view").innerHTML = V[v](id);
+  V[v].bind && V[v].bind(id);
+  window.scrollTo(0, keep);
+}
+addEventListener("hashchange", () => {
+  window.scrollTo(0, 0);
+  render();
+});
+if (!location.hash) location.hash = "#/home";
+else render();
