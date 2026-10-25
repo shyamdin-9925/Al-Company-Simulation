@@ -1,12 +1,12 @@
 const me = DB.get("me");
 if (!me) location.replace("index.html");
 const NAV = [
-  ["home", "Home", "⌂"],
-  ["workspace", "Active workspace", "◉"],
-  ["templates", "My templates", "◇"],
-  ["history", "History", "◷"],
-  ["documents", "Documents", "▤"],
-  ["settings", "Settings", "⚙"],
+  ["home", "Home", "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 11l8-7 8 7\"/><path d=\"M6 10v10h12V10\"/></svg>"],
+  ["workspace", "Active workspace", "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>"],
+  ["templates", "My templates", "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1\"/></svg>"],
+  ["history", "History", "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><path d=\"M12 7v5l3 2\"/></svg>"],
+  ["documents", "Documents", "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 3h7l4 4v14H7z\"/><path d=\"M14 3v4h4\"/></svg>"],
+  ["settings", "Settings", "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 7h10M18 7h2M4 17h2M10 17h10\"/><circle cx=\"16\" cy=\"7\" r=\"2\"/><circle cx=\"8\" cy=\"17\" r=\"2\"/></svg>"],
 ];
 const chip = (s) =>
   ({
@@ -24,10 +24,10 @@ const ini = (n) =>
 function side(r) {
   const act = sessions().some((s) => s.status === "running");
   $("#side").innerHTML =
-    `<div class="brand"><span class="mark">◈</span>AI Company</div><a class="newb" href="#/home">+ New session</a><div class="gl">WORKSPACE</div>` +
+    `<div class="brand"><span class="mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M5 19V5l7 9 7-9v14"/></svg></span>AI Company</div><a class="newb" href="#/home">+ New session</a><div class="gl">WORKSPACE</div>` +
     NAV.map(
       ([k, l, i]) =>
-        `<a class="nv ${r === k ? "on" : ""}" href="#/${k}"><span style="width:18px;text-align:center">${i}</span>${l}${k === "workspace" && act ? '<span class="live"></span>' : ""}</a>`,
+        `<a class="nv ${r === k ? "on" : ""}" href="#/${k}"><span style="width:18px;height:18px;display:flex">${i}</span>${l}${k === "workspace" && act ? '<span class="live"></span>' : ""}</a>`,
     ).join("") +
     `<div style="flex:1"></div><div class="mst"><span class="live" style="display:inline-block;margin-right:8px"></span>Groq API online<br>Gemini as secondary<br>Local model on standby</div><div class="usr"><span class="av c0">${ini(me.name)}</span>${esc(me.name)}</div>`;
 }
@@ -48,7 +48,7 @@ V.home = () => {
           .map((a, i) => `<span class="av ${colorOf(i)}">${a.role[0]}</span>`)
           .join(
             "",
-          )}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p><div class="row" style="justify-content:space-between;font-size:13px;color:#586174"><span>${t.agents.length} agents</span><b style="color:#3730A3">${hs.tpl === t.id ? "Selected" : "Use template"}</b></div></div>`,
+          )}</div><h3>${esc(t.name)}</h3><p>${esc(t.desc)}</p><div class="row" style="justify-content:space-between;font-size:13px;color:#6B665A"><span>${t.agents.length} agents</span><b style="color:#9A3412">${hs.tpl === t.id ? "Selected" : "Use template"}</b></div></div>`,
     )
     .join("");
   const rec =
@@ -63,19 +63,11 @@ V.home = () => {
   return `<p class="muted" style="margin:0 0 6px">Good ${h < 12 ? "morning" : h < 18 ? "afternoon" : "evening"}, ${esc(me.name)}</p><h1 style="margin-bottom:24px">What should your AI team work on?</h1>
 <section class="comp"><textarea id="goal" placeholder="Describe your goal, for example: Build a to-do web app with login and a REST API, then test it."></textarea>
 <div class="row" style="margin-top:12px"><span class="chip">Team: <b id="tl">${hs.tpl === "auto" ? "Auto-select" : esc(getTpl(hs.tpl)?.name)}</b></span><span class="chip">Model: <select id="mdl"><option>Groq, Llama 3.3 70B</option><option>Gemini 2.0 Flash</option><option>Local, Qwen 2.5 3B</option></select></span>
-<span class="chip">Attach docs: <select id="dsel" multiple size="1" style="display:none"></select><b id="dc">${docs.filter((d) => d.on).length}</b> <a href="#/documents">manage</a></span><span class="sp"></span><button class="btn btn-p" id="start" style="height:42px;padding:0 20px">Start session ➤</button></div></section>
+<span class="chip">Attach docs: <select id="dsel" multiple size="1" style="display:none"></select><b id="dc">${docs.filter((d) => d.on).length}</b> <a href="#/documents">manage</a></span><span class="sp"></span><button class="btn btn-p" id="start" style="height:42px;padding:0 20px">Start session →</button></div></section>
 <p class="muted" style="font-size:13px;margin:10px 4px 0">With Auto-select on, a router agent reads your goal and picks the best team template for you.</p>
 <div class="sec"><h2>Choose a team template</h2><div class="row" style="gap:8px">${cats.map((c) => `<button class="tab ${hs.cat === c ? "on" : ""}" data-c="${c}">${c}</button>`).join("")}<a href="#/templates" style="font-weight:600;font-size:13.5px;margin-left:8px">Create custom template</a></div></div>
-<div class="grid"><div class="tc ${hs.tpl === "auto" ? "sel" : ""}" data-t="auto"><div class="stack"><span class="av" style="background:#fff;border:2px dashed #A5B4FC;color:#4F46E5;margin-left:0">?</span></div><h3>Auto-select</h3><p>A router agent reads your goal and assembles the best team from the template library.</p><b style="font-size:13px;color:#3730A3">${hs.tpl === "auto" ? "Selected" : "Use auto-select"}</b></div>${cards}
-<div class="tc dis"><div class="row"><div class="stack">${"SWDG"
-    .split("")
-    .map(
-      (x) =>
-        `<span class="av" style="background:#E2E8F0;color:#334155">${x}</span>`,
-    )
-    .join(
-      "",
-    )}</div><span class="ch ch-wait">Future work</span></div><h3>Video Production</h3><p>Scene Planner, Scriptwriter, Settings Designer and a Generator agent.</p></div></div>
+<div class="grid"><div class="tc ${hs.tpl === "auto" ? "sel" : ""}" data-t="auto"><div class="stack"><span class="av" style="background:#fff;border:2px dashed #E3C4B0;color:#C2410C;margin-left:0">?</span></div><h3>Auto-select</h3><p>A router agent reads your goal and assembles the best team from the template library.</p><b style="font-size:13px;color:#9A3412">${hs.tpl === "auto" ? "Selected" : "Use auto-select"}</b></div>${cards}
+</div>
 <div class="sec"><h2>Recent sessions</h2><a href="#/history" style="font-weight:600;font-size:13.5px">View all history</a></div><section class="list">${rec}</section>`;
 };
 V.home.bind = () => {
@@ -191,10 +183,10 @@ V.workspace = (id) => {
           a = s.agents[i] || { role: "You" };
         const col =
           m.k === "bad"
-            ? "background:#FEE2E2;color:#991B1B"
+            ? "background:#F6DAD2;color:#8E2A12"
             : m.k === "ok"
-              ? "background:#DCFCE7;color:#166534"
-              : "background:#E0E7FF;color:#3730A3";
+              ? "background:#E2EADB;color:#2F5D2A"
+              : "background:#F6E3D6;color:#9A3412";
         return `<div class="m"><span class="av ${colorOf(i)}">${a.role[0]}</span><div><div><span class="mn">${esc(a.role)}</span><span class="mt">${mm(m.time || 0)}</span></div><p class="mb">${esc(m.t)}</p>${m.tag ? `<span class="tg" style="${col}">${esc(m.tag)}</span>` : ""}</div></div>`;
       })
       .join("") +
@@ -205,8 +197,8 @@ V.workspace = (id) => {
 <div class="row" style="gap:10px"><button class="btn" id="pz" ${s.status === "done" ? "disabled" : ""}>${s.paused ? "▶ Resume" : "❚❚ Pause"}</button><button class="btn" id="pdf">⬇ Export chat as PDF</button></div></div>
 <div class="bar" style="margin:16px 0 22px;height:8px"><i style="width:${pct}%"></i></div>
 <div class="row" style="align-items:flex-start;gap:20px"><section style="flex:3 1 440px;min-width:0"><div class="row" style="gap:8px;margin-bottom:16px">${["Agents", "Output files", "Process log"].map((t) => `<button class="tab ${wtab === t ? "on" : ""}" data-w="${t}">${t}</button>`).join("")}</div>${body}</section>
-<aside class="chat" style="flex:2 1 380px;min-width:0"><div class="row" style="justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E8EBF2"><b>Team chat</b><span style="color:#166534;font-weight:600;font-size:12.5px">● ${s.status === "running" && !s.paused ? "Live" : s.status === "done" ? "Finished" : "Paused"}</span></div><div class="msgs" id="msgs">${msgs}</div>
-<div class="col" style="padding:14px 18px 18px;border-top:1px solid #E8EBF2;gap:10px"><div class="row" style="gap:8px"><button class="q" data-q="Approved this step. Continue.">Approve this step</button><button class="q" data-q="Critic, please re-check the latest work.">Ask Critic to re-check</button><button class="q" data-q="Add a requirement: include a short README.">Add a requirement</button></div><div class="inp"><input id="fb" placeholder="Give feedback or ask the team a question"><button class="btn btn-p" id="snd" style="width:38px;padding:0">➤</button></div></div></aside></div>`;
+<aside class="chat" style="flex:2 1 380px;min-width:0"><div class="row" style="justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E6E1D6"><b>Team chat</b><span style="color:#2F5D2A;font-weight:600;font-size:12.5px">● ${s.status === "running" && !s.paused ? "Live" : s.status === "done" ? "Finished" : "Paused"}</span></div><div class="msgs" id="msgs">${msgs}</div>
+<div class="col" style="padding:14px 18px 18px;border-top:1px solid #E6E1D6;gap:10px"><div class="row" style="gap:8px"><button class="q" data-q="Approved this step. Continue.">Approve this step</button><button class="q" data-q="Critic, please re-check the latest work.">Ask Critic to re-check</button><button class="q" data-q="Add a requirement: include a short README.">Add a requirement</button></div><div class="inp"><input id="fb" placeholder="Give feedback or ask the team a question"><button class="btn btn-p" id="snd" style="width:38px;padding:0">→</button></div></div></aside></div>`;
 };
 V.workspace.bind = () => {
   const id = V._s;
@@ -338,8 +330,8 @@ V.templates = () => {
     bad = d.agents.some((a) => a.next && !ids.includes(a.next));
   return `<div class="row" style="justify-content:space-between;margin-bottom:24px"><div><p class="muted" style="margin:0 0 6px"><a href="#/home">Templates</a> / ${d.id ? "Edit" : "New"} template</p><h1>Create a custom team template</h1></div><div class="row"><button class="btn" id="test">Test run</button><button class="btn btn-p" id="save">Save template</button></div></div>
 <div class="row" style="align-items:flex-start;gap:20px"><div style="flex:3 1 460px;min-width:0"><section class="card"><h2>Template details</h2><div class="row"><div class="fld" style="flex-basis:220px"><label>Name</label><input id="tn" value="${esc(d.name)}"></div><div class="fld"><label>Category</label><select id="tc">${["Coding", "Research", "Content", "Business"].map((c) => `<option ${d.cat === c ? "selected" : ""}>${c}</option>`).join("")}</select></div></div><div style="margin-top:14px"><label>Description</label><input id="td" value="${esc(d.desc)}"></div></section>
-<section class="card"><div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">Agents</h2><span class="muted" style="font-size:13px">Work flows top to bottom</span></div><div class="col">${d.agents.map((a, i) => `<div class="agc" data-i="${i}"><div class="row" style="align-items:flex-end"><span class="av ${colorOf(i)}" style="margin-bottom:3px">${(a.role[0] || "?").toUpperCase()}</span><div class="fld"><label>Agent ID</label><input class="mono f-id" value="${esc(a.id)}"></div><div class="fld"><label>Role name</label><input class="f-role" value="${esc(a.role)}"></div><div class="fld"><label>Hands off to</label><select class="f-next">${opts(a)}</select></div><button class="btn btn-d f-del" ${d.agents.length < 2 ? "disabled" : ""}>✕</button></div><div><label>System prompt</label><textarea class="f-prompt" rows="2">${esc(a.prompt)}</textarea></div></div>`).join("")}<button class="btn" id="add" style="border-style:dashed;border-color:#A5B4FC;color:#3730A3;background:#FAFAFF">+ Add agent</button></div>
-<div class="row" style="margin-top:18px;padding-top:16px;border-top:1px solid #E8EBF2"><div class="fld"><label>Max revision rounds</label><input id="mr" type="number" min="1" max="10" value="${d.max}"></div><div class="fld"><label>Stop when</label><select><option>Critic replies APPROVED</option></select></div></div></section></div>
+<section class="card"><div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">Agents</h2><span class="muted" style="font-size:13px">Work flows top to bottom</span></div><div class="col">${d.agents.map((a, i) => `<div class="agc" data-i="${i}"><div class="row" style="align-items:flex-end"><span class="av ${colorOf(i)}" style="margin-bottom:3px">${(a.role[0] || "?").toUpperCase()}</span><div class="fld"><label>Agent ID</label><input class="mono f-id" value="${esc(a.id)}"></div><div class="fld"><label>Role name</label><input class="f-role" value="${esc(a.role)}"></div><div class="fld"><label>Hands off to</label><select class="f-next">${opts(a)}</select></div><button class="btn btn-d f-del" ${d.agents.length < 2 ? "disabled" : ""}>✕</button></div><div><label>System prompt</label><textarea class="f-prompt" rows="2">${esc(a.prompt)}</textarea></div></div>`).join("")}<button class="btn" id="add" style="border-style:dashed;border-color:#E3C4B0;color:#9A3412;background:#FBF8F2">+ Add agent</button></div>
+<div class="row" style="margin-top:18px;padding-top:16px;border-top:1px solid #E6E1D6"><div class="fld"><label>Max revision rounds</label><input id="mr" type="number" min="1" max="10" value="${d.max}"></div><div class="fld"><label>Stop when</label><select><option>Critic replies APPROVED</option></select></div></div></section></div>
 <aside style="flex:2 1 380px;min-width:0"><section class="card"><div class="row" style="justify-content:space-between;margin-bottom:14px"><h2 style="margin:0">Flow preview</h2><span class="ch ${dup || bad ? "ch-bad" : "ch-ok"}">${dup ? "Duplicate/empty IDs" : bad ? "Bad hand-off" : "✓ Schema valid"}</span></div><div class="row" style="gap:8px">${d.agents.map((a, i) => `<span class="node"><span class="av ${colorOf(i)}">${(a.role[0] || "?").toUpperCase()}</span>${esc(a.role)}</span>${i < d.agents.length - 1 ? '<span class="arr">→</span>' : ""}`).join("")}</div><div style="margin-top:14px;padding:10px 14px;border:1px dashed #D6A24A;border-radius:10px;background:#FFFBEB;font-size:13px;color:#7A3E0B">If the Critic finds problems, the work goes back to the previous agent. This repeats up to ${d.max} times.</div></section>
 <section class="card"><h2>Template file (YAML)</h2><pre>${esc(yaml)}</pre><p class="muted" style="font-size:13px;margin:12px 0 0">Saved templates appear on Home next to the built-in teams.</p></section>
 <section class="card"><h2>Your saved templates</h2>${mine.map((t) => `<div class="li"><b style="flex:1">${esc(t.name)}</b><button class="btn" data-e="${t.id}">Edit</button><button class="btn btn-d" data-x="${t.id}">Delete</button></div>`).join("") || '<p class="muted" style="margin:0">None yet.</p>'}</section></aside></div>`;
@@ -517,11 +509,11 @@ const ft = (n) => {
   const e = n.split(".").pop().toLowerCase();
   return (
     {
-      pdf: ["PDF", "#FEE2E2", "#991B1B"],
-      csv: ["CSV", "#DCFCE7", "#166534"],
-      docx: ["DOC", "#E0E7FF", "#3730A3"],
-      txt: ["TXT", "#EEF1F6", "#334155"],
-    }[e] || ["FILE", "#EEF1F6", "#334155"]
+      pdf: ["PDF", "#F6DAD2", "#8E2A12"],
+      csv: ["CSV", "#E2EADB", "#2F5D2A"],
+      docx: ["DOC", "#F6E3D6", "#9A3412"],
+      txt: ["TXT", "#ECE8DD", "#3D3A33"],
+    }[e] || ["FILE", "#ECE8DD", "#3D3A33"]
   );
 };
 const sz = (b) =>
@@ -542,7 +534,7 @@ V.documents = () => {
       })
       .join("") || '<div class="li muted">No files yet.</div>'
   }</section></div>
-<aside style="flex:1.2 1 320px"><section class="card"><h2>Storage</h2><div class="bar" style="height:8px"><i style="width:${Math.max(1, (used / lim) * 100)}%"></i></div><div class="row" style="justify-content:space-between;margin-top:10px;font-size:13px;color:#586174"><span>${sz(used)} used</span><span>500 MB limit</span></div></section>
+<aside style="flex:1.2 1 320px"><section class="card"><h2>Storage</h2><div class="bar" style="height:8px"><i style="width:${Math.max(1, (used / lim) * 100)}%"></i></div><div class="row" style="justify-content:space-between;margin-top:10px;font-size:13px;color:#6B665A"><span>${sz(used)} used</span><span>500 MB limit</span></div></section>
 <section class="card"><h2>Attached to the next session</h2>${d.map((x) => `<div class="tgl"><span>${esc(x.name)}</span><button class="sw ${x.on ? "on" : ""}" data-a="${x.id}" aria-label="toggle"></button></div>`).join("") || '<p class="muted" style="margin:0">Upload a file to attach it.</p>'}<a class="btn btn-p" href="#/home" style="width:100%;margin-top:14px">Back to Home</a></section></aside></div>`;
 };
 V.documents.bind = () => {
@@ -634,7 +626,7 @@ V.settings = () => {
   const tg = (k, t, sm) =>
     `<div class="tgl"><div>${t}<small>${sm}</small></div><button class="sw ${s[k] ? "on" : ""}" data-s="${k}" aria-label="${t}"></button></div>`;
   return `<div class="row" style="justify-content:space-between;margin-bottom:24px"><div><h1>Settings</h1><p class="muted" style="margin:6px 0 0">Choose which models power your agents, and what happens when one is unavailable.</p></div><button class="btn btn-p" id="sv">Save changes</button></div><div style="max-width:960px">
-<section class="card"><h2>Model providers</h2><p class="sub">Agents call these in order. Keys stay on this device.</p>${P.map(([k, n, r, c, kl, kt, ms]) => `<div class="row" style="padding:16px 0;border-top:1px solid #E8EBF2;align-items:flex-end"><span class="av ${c}" style="border-radius:10px;width:40px;height:40px">${n[0]}</span><div style="flex:1 1 150px"><b>${n}</b><div><span class="ch ${s.providers[k].key ? "ch-ok" : "ch-wait"}" id="st-${k}">${s.providers[k].key ? "Connected" : "Not set"}</span> <span class="muted" style="font-size:12.5px">${r}</span></div></div><div class="fld"><label>${kl}</label><input data-k="${k}" type="${kt}" value="${esc(s.providers[k].key)}"></div><div class="fld"><label>Model</label><select data-m="${k}">${ms.map((m) => `<option ${s.providers[k].model === m ? "selected" : ""}>${m}</option>`).join("")}</select></div><button class="btn" data-t="${k}">Test</button></div>`).join("")}</section>
+<section class="card"><h2>Model providers</h2><p class="sub">Agents call these in order. Keys stay on this device.</p>${P.map(([k, n, r, c, kl, kt, ms]) => `<div class="row" style="padding:16px 0;border-top:1px solid #E6E1D6;align-items:flex-end"><span class="av ${c}" style="border-radius:10px;width:40px;height:40px">${n[0]}</span><div style="flex:1 1 150px"><b>${n}</b><div><span class="ch ${s.providers[k].key ? "ch-ok" : "ch-wait"}" id="st-${k}">${s.providers[k].key ? "Connected" : "Not set"}</span> <span class="muted" style="font-size:12.5px">${r}</span></div></div><div class="fld"><label>${kl}</label><input data-k="${k}" type="${kt}" value="${esc(s.providers[k].key)}"></div><div class="fld"><label>Model</label><select data-m="${k}">${ms.map((m) => `<option ${s.providers[k].model === m ? "selected" : ""}>${m}</option>`).join("")}</select></div><button class="btn" data-t="${k}">Test</button></div>`).join("")}</section>
 <section class="card"><h2>When a model is unavailable</h2><p class="sub">Keep sessions running when you hit an API limit or lose your connection.</p>${tg("toGemini", "Switch to Gemini when Groq hits its rate limit", "The conversation continues with the same agents and history.")}${tg("toLocal", "Switch to the local model when offline", "Slower, but needs no internet or API key.")}${tg("ask", "Ask me before switching models", "Show a prompt instead of switching automatically.")}</section>
 <div class="row" style="align-items:stretch"><section class="card" style="flex:1 1 380px"><h2>Session defaults</h2><p class="sub">Used when you start a new session.</p><label>Default team</label><select id="dt"><option value="auto">Auto-select</option>${allTemplates()
     .map(
